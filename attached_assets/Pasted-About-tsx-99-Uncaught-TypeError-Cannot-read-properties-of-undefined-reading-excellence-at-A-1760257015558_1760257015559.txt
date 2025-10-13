@@ -1,0 +1,47 @@
+About.tsx:99 Uncaught TypeError: Cannot read properties of undefined (reading 'excellence')
+    at About (About.tsx:99:34)
+    at renderWithHooks (chunk-FJ2A54M7.js?v=b725f1b3:11548:26)
+    at updateFunctionComponent (chunk-FJ2A54M7.js?v=b725f1b3:14582:28)
+    at beginWork (chunk-FJ2A54M7.js?v=b725f1b3:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-FJ2A54M7.js?v=b725f1b3:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-FJ2A54M7.js?v=b725f1b3:3699:24)
+    at invokeGuardedCallback (chunk-FJ2A54M7.js?v=b725f1b3:3733:39)
+    at beginWork$1 (chunk-FJ2A54M7.js?v=b725f1b3:19765:15)
+    at performUnitOfWork (chunk-FJ2A54M7.js?v=b725f1b3:19198:20)
+    at workLoopSync (chunk-FJ2A54M7.js?v=b725f1b3:19137:13)Understand this error
+chunk-FJ2A54M7.js?v=b725f1b3:14032 The above error occurred in the <About> component:
+
+    at About (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/src/components/About.tsx?t=1760256840092:27:45)
+    at div
+    at Home (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/src/pages/Home.tsx?t=1760256840092:224:22)
+    at Index
+    at RenderedRoute (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/react-router-dom.js?v=85713499:4088:5)
+    at Routes (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/react-router-dom.js?v=85713499:4558:5)
+    at PresenceChild (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/framer-motion.js?v=e42b0d2f:121:24)
+    at AnimatePresence (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/framer-motion.js?v=e42b0d2f:210:26)
+    at AnimatedRoutes (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/src/App.tsx?t=1760256840092:90:22)
+    at Router (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/react-router-dom.js?v=85713499:4501:15)
+    at BrowserRouter (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/react-router-dom.js?v=85713499:5247:5)
+    at Provider (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/chunk-O2CNVHOO.js?v=b725f1b3:22:15)
+    at TooltipProvider (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=f477dc51:58:5)
+    at O (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/next-themes.js?v=ac1fef95:23:25)
+    at z (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/next-themes.js?v=ac1fef95:21:18)
+    at ThemeProvider (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/src/components/ThemeProvider.tsx:23:33)
+    at QueryClientProvider (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/node_modules/.vite/deps/@tanstack_react-query.js?v=193ea6dd:3081:3)
+    at App (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/src/App.tsx?t=1760256840092:3113:5)
+    at AppWithLoading (https://9b480eb4-f414-4048-9f91-a0bf42be3363-00-11lntp5j84zlr.pike.replit.dev:5000/src/main.tsx?t=1760256840092:31:39)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-FJ2A54M7.js?v=b725f1b3:14032Understand this error
+chunk-FJ2A54M7.js?v=b725f1b3:19413 Uncaught TypeError: Cannot read properties of undefined (reading 'excellence')
+    at About (About.tsx:99:34)
+    at renderWithHooks (chunk-FJ2A54M7.js?v=b725f1b3:11548:26)
+    at updateFunctionComponent (chunk-FJ2A54M7.js?v=b725f1b3:14582:28)
+    at beginWork (chunk-FJ2A54M7.js?v=b725f1b3:15924:22)
+    at beginWork$1 (chunk-FJ2A54M7.js?v=b725f1b3:19753:22)
+    at performUnitOfWork (chunk-FJ2A54M7.js?v=b725f1b3:19198:20)
+    at workLoopSync (chunk-FJ2A54M7.js?v=b725f1b3:19137:13)
+    at renderRootSync (chunk-FJ2A54M7.js?v=b725f1b3:19116:15)
+    at recoverFromConcurrentError (chunk-FJ2A54M7.js?v=b725f1b3:18736:28)
+    at performConcurrentWorkOnRoot (chunk-FJ2A54M7.js?v=b725f1b3:18684:30)Understand this error
