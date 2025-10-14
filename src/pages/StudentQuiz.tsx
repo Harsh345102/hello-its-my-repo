@@ -159,28 +159,57 @@ Important:
     }
     
     const data = await response.json();
-    const text = data.candidates[0].content.parts[0].text;
+    let text = data.candidates[0].content.parts[0].text;
     
-    // Clean the text to extract valid JSON
-    const match = text.match(/\[[\s\S]*\]/);
-    if (!match) {
-      throw new Error("Could not extract questions from AI response");
+    // Multiple extraction strategies
+    let cleanedJson = '';
+    
+    // Strategy 1: Try to extract JSON from markdown code blocks
+    const markdownMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (markdownMatch) {
+      cleanedJson = markdownMatch[1].trim();
+    } else {
+      // Strategy 2: Try to extract JSON array directly
+      const arrayMatch = text.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        cleanedJson = arrayMatch[0];
+      } else {
+        console.error("Raw AI response:", text);
+        throw new Error("Could not extract questions from AI response. Please try again.");
+      }
     }
     
-    let cleanedJson = match[0];
-    // Remove any control characters and fix common JSON issues
+    // Clean the JSON string
+    // Remove control characters
     cleanedJson = cleanedJson.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+    // Fix common JSON issues with newlines and special characters
+    cleanedJson = cleanedJson.replace(/\n/g, ' ').replace(/\r/g, '');
     
     try {
       const questions = JSON.parse(cleanedJson);
+      
       if (!Array.isArray(questions)) {
-        throw new Error("Invalid questions format");
+        throw new Error("Response is not an array");
       }
-      return questions.slice(0, quizState.questionCount);
+      
+      if (questions.length === 0) {
+        throw new Error("No questions generated");
+      }
+      
+      // Validate question structure
+      const validQuestions = questions.filter(q => 
+        q.question && q.type && q.answer && q.explanation
+      );
+      
+      if (validQuestions.length === 0) {
+        throw new Error("No valid questions found");
+      }
+      
+      return validQuestions.slice(0, quizState.questionCount);
     } catch (parseError) {
       console.error("JSON Parse Error:", parseError);
       console.error("Attempted to parse:", cleanedJson.substring(0, 500));
-      throw new Error("Failed to parse questions. Please try again.");
+      throw new Error("The AI generated an invalid response. Please try again with different settings.");
     }
   };
 

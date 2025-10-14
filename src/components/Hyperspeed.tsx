@@ -48,6 +48,14 @@ const Hyperspeed = ({
   const appRef = useRef(null);
 
   useEffect(() => {
+    // Check if WebGL is supported
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      console.warn('WebGL not supported, Hyperspeed animation disabled');
+      return;
+    }
+    
     if (appRef.current) {
       appRef.current.dispose();
       const container = document.getElementById('lights');
