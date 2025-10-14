@@ -4685,45 +4685,46 @@ Student ID: ${studentId}`);
 
       {/* Manage Sent Student Notifications Modal */}
       {showSentNotificationsModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-xl p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto border border-border/50"
+            className="bg-card rounded-xl p-3 sm:p-6 w-full max-w-[calc(100vw-1rem)] sm:max-w-4xl max-h-[85vh] overflow-y-auto border border-border/50"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">
+            <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+              <h3 className="text-sm sm:text-lg font-semibold text-foreground leading-tight">
                 Manage Sent Student Notifications ({sentStudentNotifications.length})
               </h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowSentNotificationsModal(false)}
+                className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {sentStudentNotifications.length === 0 ? (
-                <div className="text-center py-8">
-                  <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No student notifications sent yet</p>
-                  <p className="text-sm text-muted-foreground">Click "Notify Students" to send your first notification</p>
+                <div className="text-center py-6 sm:py-8">
+                  <Bell className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-3 sm:mb-4" />
+                  <p className="text-sm sm:text-base text-muted-foreground">No student notifications sent yet</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">Click "Notify Students" to send your first notification</p>
                 </div>
               ) : (
                 sentStudentNotifications
                   .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                   .map((notification) => (
-                    <div key={notification.id} className="bg-muted/20 rounded-lg p-4 border border-border/30">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-foreground mb-1">{notification.subject}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">{notification.message}</p>
-                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                            <span>Sent: {new Date(notification.createdAt).toLocaleDateString()}</span>
-                            <span>•</span>
-                            <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">
+                    <div key={notification.id} className="bg-muted/20 rounded-lg p-3 sm:p-4 border border-border/30">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-2 sm:mb-3 gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground mb-1 text-sm sm:text-base break-words">{notification.subject}</h4>
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-2 break-words line-clamp-2">{notification.message}</p>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                            <span className="whitespace-nowrap">Sent: {new Date(notification.createdAt).toLocaleDateString()}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="px-2 py-0.5 sm:py-1 bg-purple-500/20 text-purple-400 rounded text-[10px] sm:text-xs whitespace-nowrap">
                               Target: {notification.targetType === 'all' ? 'All Students' : 
                                       notification.targetType === 'class' ? `Class ${notification.targetClass}` :
                                       notification.targetType === 'section' ? `Class ${notification.targetClass}-${notification.targetSection}` :
@@ -4733,24 +4734,24 @@ Student ID: ${studentId}`);
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center space-x-2 ml-4">
+                        <div className="flex items-center gap-1 sm:gap-2 sm:ml-4 flex-shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditStudentNotification(notification)}
-                            className="h-8 px-3 text-blue-600 hover:text-blue-700"
+                            className="h-7 px-2 sm:h-8 sm:px-3 text-blue-600 hover:text-blue-700"
                           >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
+                            <Edit className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Edit</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteStudentNotification(notification.id)}
-                            className="h-8 px-3 text-red-600 hover:text-red-700"
+                            className="h-7 px-2 sm:h-8 sm:px-3 text-red-600 hover:text-red-700"
                           >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            Delete
+                            <Trash2 className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Delete</span>
                           </Button>
                         </div>
                       </div>
