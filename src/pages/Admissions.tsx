@@ -1743,7 +1743,6 @@ Status: ${record.paymentStatus}`);
                               {paymentProcessing ? 'Processing...' : 'Pay & Submit'}
                             </Button>
                           </div>
-                          </div>
                         </div>
                       </motion.div>
                     )}
