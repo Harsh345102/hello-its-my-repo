@@ -395,48 +395,57 @@ const StudentDashboard = () => {
       return;
     }
 
-    // Update fee records to paid status
-    const updatedFeeRecords = feeRecords.map(fee => {
-      if (selectedPaymentRequest.months.includes(fee.month) && fee.status === 'pending') {
-        return {
-          ...fee,
-          status: 'paid' as const,
-          paymentDate: new Date().toISOString()
-        };
-      }
-      return fee;
-    });
-    
-    setFeeRecords(updatedFeeRecords);
-    const allFeeRecords = JSON.parse(localStorage.getItem('royal-academy-fee-records') || '[]').map((fee: FeeRecord) => {
-      const updatedFee = updatedFeeRecords.find(f => f.id === fee.id);
-      return updatedFee || fee;
-    });
-    localStorage.setItem('royal-academy-fee-records', JSON.stringify(allFeeRecords));
-    // Write to Supabase for real-time sync
-    await setSupabaseData('royal-academy-fee-records', allFeeRecords);
+    // Demo mode - simulate payment processing
+    const processingAlert = setTimeout(() => {
+      alert('Processing payment... Please wait.');
+    }, 500);
 
-    // Update payment request status
-    const updatedPaymentRequests = paymentRequests.map(req => 
-      req.id === selectedPaymentRequest.id 
-        ? { ...req, status: 'paid' as const }
-        : req
-    );
-    
-    setPaymentRequests(updatedPaymentRequests);
-    const allPaymentRequests = JSON.parse(localStorage.getItem('royal-academy-payment-requests') || '[]').map((req: PaymentRequest) => {
-      const updatedReq = updatedPaymentRequests.find(r => r.id === req.id);
-      return updatedReq || req;
-    });
-    localStorage.setItem('royal-academy-payment-requests', JSON.stringify(allPaymentRequests));
-    // Write to Supabase for real-time sync
-    await setSupabaseData('royal-academy-payment-requests', allPaymentRequests);
+    setTimeout(async () => {
+      clearTimeout(processingAlert);
 
-    alert(`Payment of ₹${selectedPaymentRequest.amount} completed successfully!\nMonths: ${selectedPaymentRequest.months.join(', ')}`);
-    
-    setShowPaymentModal(false);
-    setSelectedPaymentRequest(null);
-    setPaymentForm({ amount: '', paymentMethod: 'online', notes: '' });
+      // Update fee records to paid status
+      const updatedFeeRecords = feeRecords.map(fee => {
+        if (selectedPaymentRequest.months.includes(fee.month) && fee.status === 'pending') {
+          return {
+            ...fee,
+            status: 'paid' as const,
+            paymentDate: new Date().toISOString()
+          };
+        }
+        return fee;
+      });
+      
+      setFeeRecords(updatedFeeRecords);
+      const allFeeRecords = JSON.parse(localStorage.getItem('royal-academy-fee-records') || '[]').map((fee: FeeRecord) => {
+        const updatedFee = updatedFeeRecords.find(f => f.id === fee.id);
+        return updatedFee || fee;
+      });
+      localStorage.setItem('royal-academy-fee-records', JSON.stringify(allFeeRecords));
+      // Write to Supabase for real-time sync
+      await setSupabaseData('royal-academy-fee-records', allFeeRecords);
+
+      // Update payment request status
+      const updatedPaymentRequests = paymentRequests.map(req => 
+        req.id === selectedPaymentRequest.id 
+          ? { ...req, status: 'paid' as const }
+          : req
+      );
+      
+      setPaymentRequests(updatedPaymentRequests);
+      const allPaymentRequests = JSON.parse(localStorage.getItem('royal-academy-payment-requests') || '[]').map((req: PaymentRequest) => {
+        const updatedReq = updatedPaymentRequests.find(r => r.id === req.id);
+        return updatedReq || req;
+      });
+      localStorage.setItem('royal-academy-payment-requests', JSON.stringify(allPaymentRequests));
+      // Write to Supabase for real-time sync
+      await setSupabaseData('royal-academy-payment-requests', allPaymentRequests);
+
+      alert(`✅ Demo Payment Successful!\n\nAmount: ₹${selectedPaymentRequest.amount}\nMonths: ${selectedPaymentRequest.months.join(', ')}\n\nNote: This is a demo payment. In production, integrate your Razorpay API key.`);
+      
+      setShowPaymentModal(false);
+      setSelectedPaymentRequest(null);
+      setPaymentForm({ amount: '', paymentMethod: 'online', notes: '' });
+    }, 2000);
   };
 
   useEffect(() => {
@@ -2013,29 +2022,26 @@ const StudentDashboard = () => {
               {/* Payment Method */}
               <div>
                 <label className="block text-xs sm:text-sm font-medium mb-2">Payment Method</label>
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  {[
-                    { id: 'razorpay', name: 'Razorpay', icon: '💳', color: 'from-blue-500 to-blue-600' },
-                    { id: 'paypal', name: 'PayPal', icon: '🅿️', color: 'from-blue-600 to-blue-700' },
-                    { id: 'upi', name: 'UPI', icon: '📱', color: 'from-green-500 to-green-600' },
-                    { id: 'card', name: 'Card', icon: '💳', color: 'from-purple-500 to-purple-600' }
-                  ].map((method) => (
-                    <button
-                      key={method.id}
-                      type="button"
-                      onClick={() => setPaymentForm({ ...paymentForm, paymentMethod: method.id })}
-                      className={`p-2 sm:p-3 rounded-lg border-2 transition-all min-h-[44px] ${
-                        paymentForm.paymentMethod === method.id
-                          ? 'border-gold bg-gold/10'
-                          : 'border-border/30 hover:border-border'
-                      }`}
-                    >
-                      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-r ${method.color} flex items-center justify-center mx-auto mb-1 sm:mb-2`}>
-                        <span className="text-white text-xs sm:text-sm">{method.icon}</span>
+                <div className="grid grid-cols-1 gap-2 sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentForm({ ...paymentForm, paymentMethod: 'razorpay' })}
+                    className={`p-3 sm:p-4 rounded-lg border-2 transition-all ${
+                      paymentForm.paymentMethod === 'razorpay'
+                        ? 'border-gold bg-gold/10'
+                        : 'border-border/30 hover:border-border'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                        <span className="text-white text-xl">💳</span>
                       </div>
-                      <p className="text-[10px] sm:text-xs font-medium text-foreground">{method.name}</p>
-                    </button>
-                  ))}
+                      <div className="text-left">
+                        <p className="text-sm sm:text-base font-semibold text-foreground">Razorpay</p>
+                        <p className="text-xs text-muted-foreground">Secure payment gateway</p>
+                      </div>
+                    </div>
+                  </button>
                 </div>
               </div>
 
@@ -2080,36 +2086,6 @@ const StudentDashboard = () => {
                   </div>
                 </div>
               )}
-              
-              {paymentForm.paymentMethod === 'paypal' && (
-                <div className="bg-blue-600/10 border border-blue-600/20 rounded-lg p-3">
-                  <div className="flex items-start space-x-2">
-                    <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">P</span>
-                    </div>
-                    <div className="text-sm">
-                      <p className="font-medium text-foreground mb-1">PayPal Payment</p>
-                      <p className="text-xs text-muted-foreground">
-                        Pay securely with your PayPal account or credit/debit card.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {(paymentForm.paymentMethod === 'upi' || paymentForm.paymentMethod === 'card') && (
-                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                  <div className="flex items-start space-x-2">
-                    <AlertCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <p className="font-medium text-foreground mb-1">Secure Payment</p>
-                      <p className="text-xs text-muted-foreground">
-                        Your payment is secured with bank-level encryption.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-2 pt-2">
@@ -2126,16 +2102,10 @@ const StudentDashboard = () => {
                 </Button>
                 <Button
                   onClick={processPayment}
-                  className={`flex-1 h-11 text-white ${
-                    paymentForm.paymentMethod === 'razorpay' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                    paymentForm.paymentMethod === 'paypal' ? 'bg-gradient-to-r from-blue-600 to-blue-700' :
-                    'bg-gradient-to-r from-green-500 to-emerald-500'
-                  }`}
+                  className="flex-1 h-11 text-white bg-gradient-to-r from-blue-500 to-blue-600"
                 >
                   <DollarSign className="h-4 w-4 mr-2" />
-                  <span className="text-sm sm:text-base">Pay with {paymentForm.paymentMethod === 'razorpay' ? 'Razorpay' : 
-                           paymentForm.paymentMethod === 'paypal' ? 'PayPal' : 
-                           paymentForm.paymentMethod === 'upi' ? 'UPI' : 'Card'}</span>
+                  <span className="text-sm sm:text-base">Pay with Razorpay</span>
                 </Button>
               </div>
             </div>

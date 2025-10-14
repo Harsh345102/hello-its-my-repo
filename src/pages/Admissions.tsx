@@ -356,34 +356,16 @@ const Admissions = () => {
   const processRazorpayPayment = async () => {
     setPaymentProcessing(true);
     try {
-      // Razorpay integration
-      const options = {
-        key: 'rzp_test_1234567890', // Replace with your Razorpay key
-        amount: getCurrentAmountInPaise(), // Amount in paise
-        currency: 'INR',
-        name: 'Royal Academy',
-        description: `${subscriptionType === 'monthly' ? 'Monthly' : 'Yearly'} Subscription`,
-        image: '/src/assets/school-logo.png',
-        handler: function (response: any) {
-          setPaymentSuccess(true);
-          setPaymentProcessing(false);
-          // Handle successful payment
-          handleFormSubmission('paid', 'razorpay');
-        },
-        prefill: {
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          contact: formData.phone
-        },
-        theme: {
-          color: 'hsl(var(--gold))'
-        }
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      // Demo mode - simulate payment success after 2 seconds
+      setTimeout(() => {
+        setPaymentSuccess(true);
+        setPaymentProcessing(false);
+        handleFormSubmission('paid', 'razorpay');
+        alert('Demo Payment Successful! ✅\n\nThis is a demo payment. In production, integrate your Razorpay API key.');
+      }, 2000);
     } catch (error) {
       setPaymentProcessing(false);
+      alert('Payment failed. Please try again.');
     }
   };
 
