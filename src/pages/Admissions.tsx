@@ -507,7 +507,7 @@ const Admissions = () => {
         studentPhoto: studentPhotoBase64,
         // Add default values for missing properties to match AdmissionRecord interface
         citizenship: 'Indian', // Default value
-        level: 'Secondary', // Default value  
+        level: 'Secondary', // Default value
         term: 'Regular', // Default value
         program: 'General Education', // Default value
         essay: '', // Default empty
@@ -576,16 +576,24 @@ Status: ${record.paymentStatus}`);
     });
   };
 
-  // Test submission without payment
-  const handleTestSubmission = async () => {
-    console.log('[Admissions] handleTestSubmission called');
-    console.log('[Admissions] Current formData:', formData);
-
-    // Basic validation for required fields from earlier steps
+  // Validation for Step 0 and Step 1
+  const validateStep1 = () => {
     const requiredTextFields = [
       formData.firstName,
       formData.lastName,
       formData.email,
+    ];
+
+    if (requiredTextFields.some(v => !v || !v.trim())) {
+      alert('Please complete all required text fields (Personal Info).');
+      setCurrentStep(0);
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep2 = () => {
+    const requiredTextFields = [
       formData.class,
       formData.fatherName,
       formData.motherName,
@@ -598,46 +606,30 @@ Status: ${record.paymentStatus}`);
       formData.studentPhoto
     ];
 
-    console.log('[Admissions] Required fields check:', {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      class: formData.class,
-      fatherName: formData.fatherName,
-      motherName: formData.motherName,
-      studentAge: formData.studentAge,
-      aadhaarCard: formData.aadhaarCard,
-      birthCertificate: formData.birthCertificate,
-      studentPhoto: formData.studentPhoto
-    });
-
     if (requiredTextFields.some(v => !v || !v.trim())) {
-      alert('Please complete all required text fields (Personal Info and Academic Details).');
-      // Navigate the user to the first incomplete step
-      if (!formData.firstName || !formData.lastName || !formData.email) {
-        setCurrentStep(0);
-      } else if (!formData.class || !formData.fatherName || !formData.motherName || !formData.studentAge) {
-        setCurrentStep(1);
-      }
-      return;
+      alert('Please complete all required fields in Academic Details.');
+      setCurrentStep(1);
+      return false;
     }
 
     if (requiredFiles.some(file => !file)) {
       alert('Please upload all required documents (Aadhaar Card, Birth Certificate, and Student Photo).');
       setCurrentStep(1);
-      return;
+      return false;
     }
-
-    console.log('[Admissions] Validation passed, calling handleFormSubmission');
-    await handleFormSubmission('test', null);
+    return true;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentStep < 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handlePayment();
+    if (currentStep === 0) {
+      if (validateStep1()) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else if (currentStep === 1) {
+      if (validateStep2()) {
+        handlePayment();
+      }
     }
   };
 
@@ -1723,22 +1715,13 @@ Status: ${record.paymentStatus}`);
                             {/* Stripe Option - REMOVED */}
                           </div>
                           {/* Payment Buttons */}
-                          <div className="mt-6 flex gap-3">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={handleTestSubmission}
-                              disabled={paymentProcessing}
-                              className="flex-1"
-                            >
-                              Submit without Payment (Test)
-                            </Button>
+                          <div className="mt-6">
                             <Button
                               type="button"
                               variant="default"
                               onClick={handlePayment}
                               disabled={!selectedPaymentMethod || paymentProcessing}
-                              className="flex-1 bg-gold hover:bg-gold/90 text-black"
+                              className="w-full bg-gold hover:bg-gold/90 text-black font-semibold"
                             >
                               {paymentProcessing ? 'Processing...' : 'Pay & Submit'}
                             </Button>
@@ -1753,7 +1736,15 @@ Status: ${record.paymentStatus}`);
                     <Button
                       type="button"
                       variant="ghost"
-                      onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                      onClick={() => {
+                        if (currentStep === 1) {
+                          if (validateStep2()) { // Ensure step 2 is valid before going back
+                            setCurrentStep(currentStep - 1);
+                          }
+                        } else {
+                          setCurrentStep(Math.max(0, currentStep - 1));
+                        }
+                      }}
                       disabled={currentStep === 0 || paymentProcessing}
                       className={currentStep === 0 ? "invisible" : ""}
                     >
@@ -1764,7 +1755,13 @@ Status: ${record.paymentStatus}`);
                       <Button
                         type="button"
                         variant="gold"
-                        onClick={() => setCurrentStep(currentStep + 1)}
+                        onClick={() => {
+                          if (currentStep === 0) {
+                            if (validateStep1()) {
+                              setCurrentStep(currentStep + 1);
+                            }
+                          }
+                        }}
                       >
                         Next
                       </Button>
