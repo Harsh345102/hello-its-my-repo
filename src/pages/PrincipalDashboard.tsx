@@ -1529,7 +1529,8 @@ Teacher ID: ${teacherId}`);
                       <tr className="text-left border-b border-border/50">
                         <th className="py-3 pr-4">Student</th>
                         <th className="py-3 pr-4">Contact</th>
-                        <th className="py-3 pr-4">Class/Roll</th>
+                        <th className="py-3 pr-4">Family Details</th>
+                        <th className="py-3 pr-4">Class/Age</th>
                         <th className="py-3 pr-4">Plan</th>
                         <th className="py-3 pr-4">Payment</th>
                         <th className="py-3 pr-4">Documents</th>
@@ -1589,8 +1590,14 @@ Teacher ID: ${teacherId}`);
                               </div>
                             </td>
                             <td className="py-3 pr-4 text-muted-foreground">
+                              <div className="text-xs">
+                                <div><strong>Father:</strong> {a.fatherName || 'N/A'}</div>
+                                <div><strong>Mother:</strong> {a.motherName || 'N/A'}</div>
+                              </div>
+                            </td>
+                            <td className="py-3 pr-4 text-muted-foreground">
                               <div>Class {a.class || 'N/A'}</div>
-                              <div className="text-xs">Roll: {a.rollNumber || 'N/A'}</div>
+                              <div className="text-xs">Age: {a.studentAge || 'N/A'} years</div>
                             </td>
                             <td className="py-3 pr-4">
                               <span className={`px-2 py-1 text-xs rounded-full ${

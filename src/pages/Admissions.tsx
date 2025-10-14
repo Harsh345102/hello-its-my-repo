@@ -9,6 +9,34 @@ import { Textarea } from "@/components/ui/texxxxxtarea";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { getSupabaseData, setSupabaseData, subscribeToSupabaseChanges } from "@/lib/supabaseHelpers";
 
+// Admission record type for localStorage sync with Admissions page
+interface AdmissionRecord {
+  id: string;
+  createdAt: string;
+  paymentStatus: 'paid' | 'test';
+  paymentMethod?: 'razorpay' | 'paypal' | 'stripe' | 'test' | null;
+  subscriptionType: 'monthly' | 'yearly';
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  citizenship: string;
+  level: string;
+  term: string;
+  program: string;
+  essay: string;
+  ref1: string;
+  refEmail: string;
+  // Additional properties for student records
+  class?: string;
+  fatherName?: string;
+  motherName?: string;
+  studentAge?: string;
+  studentPhoto?: string | null;
+  aadhaarCard?: string | null;
+  birthCertificate?: string | null;
+}
+
 const Admissions = () => {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -16,12 +44,15 @@ const Admissions = () => {
     email: "",
     phone: "",
     class: "",
-    rollNumber: "",
+    rollNumber: "", // This will be removed, but keeping for now to avoid breaking existing logic during transition
+    fatherName: "",
+    motherName: "",
+    studentAge: "",
     aadhaarCard: null as File | null,
     birthCertificate: null as File | null,
     studentPhoto: null as File | null
   });
-  
+
   const [currentStep, setCurrentStep] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'razorpay' | 'paypal' | 'stripe' | null>(null);
@@ -166,14 +197,14 @@ const Admissions = () => {
   // Scroll progress tracking (throttled for performance)
   useEffect(() => {
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
           const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
           const progress = (window.scrollY / totalHeight) * 100;
           setScrollProgress(progress);
-          
+
           // Show secondary nav when scrolling past hero
           setShowSecondaryNav(window.scrollY > 400);
           ticking = false;
@@ -181,7 +212,7 @@ const Admissions = () => {
         ticking = true;
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -221,7 +252,7 @@ const Admissions = () => {
   // Handle Contact Form submission
   const handleContactFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!contactFormData.name || !contactFormData.email || !contactFormData.phone) {
       alert('Please fill in all required fields');
       return;
@@ -416,7 +447,7 @@ const Admissions = () => {
   const saveAdmission = async (paymentStatus: 'paid' | 'test', paymentMethod?: 'razorpay' | 'paypal' | 'stripe' | null) => {
     try {
       console.log('[Admissions] Saving admission to Supabase...');
-      
+
       // Convert files to base64 for storage
       let aadhaarCardBase64 = null;
       let birthCertificateBase64 = null;
@@ -431,12 +462,12 @@ const Admissions = () => {
       if (formData.studentPhoto) {
         studentPhotoBase64 = await fileToBase64(formData.studentPhoto);
       }
-      
+
       // Get existing admissions from Supabase and ensure it's always an array
       const rawExisting = await getSupabaseData<any[]>('royal-academy-admissions', []);
       console.log('[Admissions] Raw existing data type:', typeof rawExisting);
       console.log('[Admissions] Raw existing data:', rawExisting);
-      
+
       // Extra safety: handle both array and non-array cases
       let existing: any[] = [];
       if (Array.isArray(rawExisting)) {
@@ -453,11 +484,11 @@ const Admissions = () => {
         console.warn('[Admissions] Existing data is not an array, using empty array');
         existing = [];
       }
-      
+
       console.log('[Admissions] Safe existing records count:', existing.length);
-      
+
       // Create new admission record with base64 encoded files and default values for missing properties
-      const record = {
+      const record: AdmissionRecord = {
         id: Date.now().toString(),
         createdAt: new Date().toISOString(),
         paymentStatus,
@@ -468,7 +499,9 @@ const Admissions = () => {
         email: formData.email,
         phone: formData.phone,
         class: formData.class,
-        rollNumber: formData.rollNumber,
+        fatherName: formData.fatherName,
+        motherName: formData.motherName,
+        studentAge: formData.studentAge,
         aadhaarCard: aadhaarCardBase64,
         birthCertificate: birthCertificateBase64,
         studentPhoto: studentPhotoBase64,
@@ -481,18 +514,18 @@ const Admissions = () => {
         ref1: '', // Default empty
         refEmail: '' // Default empty
       };
-      
+
       console.log('[Admissions] Saving admission record (files converted to base64)');
       console.log('[Admissions] New record:', record);
       console.log('[Admissions] Existing records to merge:', existing.length);
-      
+
       // Safely create new array with additional validation
       const updatedRecords = [record, ...existing];
       console.log('[Admissions] Total records after merge:', updatedRecords.length);
-      
+
       // Save to Supabase (this also saves to localStorage as fallback)
       const success = await setSupabaseData('royal-academy-admissions', updatedRecords);
-      
+
       if (success) {
         console.log('[Admissions] Admission saved successfully. Total records:', updatedRecords.length);
         alert(`Admission saved successfully!
@@ -533,7 +566,10 @@ Status: ${record.paymentStatus}`);
       email: "",
       phone: "",
       class: "",
-      rollNumber: "",
+      rollNumber: "", // Removed
+      fatherName: "",
+      motherName: "",
+      studentAge: "",
       aadhaarCard: null,
       birthCertificate: null,
       studentPhoto: null
@@ -544,50 +580,54 @@ Status: ${record.paymentStatus}`);
   const handleTestSubmission = async () => {
     console.log('[Admissions] handleTestSubmission called');
     console.log('[Admissions] Current formData:', formData);
-    
+
     // Basic validation for required fields from earlier steps
     const requiredTextFields = [
       formData.firstName,
       formData.lastName,
       formData.email,
       formData.class,
-      formData.rollNumber,
+      formData.fatherName,
+      formData.motherName,
+      formData.studentAge,
     ];
-    
+
     const requiredFiles = [
       formData.aadhaarCard,
       formData.birthCertificate,
       formData.studentPhoto
     ];
-    
+
     console.log('[Admissions] Required fields check:', {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
       class: formData.class,
-      rollNumber: formData.rollNumber,
+      fatherName: formData.fatherName,
+      motherName: formData.motherName,
+      studentAge: formData.studentAge,
       aadhaarCard: formData.aadhaarCard,
       birthCertificate: formData.birthCertificate,
       studentPhoto: formData.studentPhoto
     });
-    
+
     if (requiredTextFields.some(v => !v || !v.trim())) {
       alert('Please complete all required text fields (Personal Info and Academic Details).');
       // Navigate the user to the first incomplete step
       if (!formData.firstName || !formData.lastName || !formData.email) {
         setCurrentStep(0);
-      } else if (!formData.class || !formData.rollNumber) {
+      } else if (!formData.class || !formData.fatherName || !formData.motherName || !formData.studentAge) {
         setCurrentStep(1);
       }
       return;
     }
-    
+
     if (requiredFiles.some(file => !file)) {
       alert('Please upload all required documents (Aadhaar Card, Birth Certificate, and Student Photo).');
       setCurrentStep(1);
       return;
     }
-    
+
     console.log('[Admissions] Validation passed, calling handleFormSubmission');
     await handleFormSubmission('test', null);
   };
@@ -606,13 +646,13 @@ Status: ${record.paymentStatus}`);
   return (
     <div className="min-h-screen bg-background">
       {/* Scroll Progress Bar */}
-      <div 
+      <div
         className="fixed top-0 left-0 h-1 bg-gradient-to-r from-gold to-crimson z-50 transition-all duration-300"
         style={{ width: `${scrollProgress}%` }}
       />
-      
+
       <Navigation />
-      
+
       {/* Enhanced Secondary Navigation */}
       <AnimatePresence>
         {showSecondaryNav && (
@@ -620,7 +660,7 @@ Status: ${record.paymentStatus}`);
             initial={{ y: -80, opacity: 0, scale: 0.95 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: -80, opacity: 0, scale: 0.95 }}
-            transition={{ 
+            transition={{
               type: "spring",
               stiffness: 300,
               damping: 30,
@@ -683,7 +723,7 @@ Status: ${record.paymentStatus}`);
                     </motion.a>
                   ))}
                 </div>
-                
+
                 {/* Apply Now Button - Desktop Only */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -693,9 +733,9 @@ Status: ${record.paymentStatus}`);
                   whileTap={{ scale: 0.95 }}
                   className="hidden md:block flex-shrink-0"
                 >
-                  <Button 
-                    variant="gold" 
-                    size="sm" 
+                  <Button
+                    variant="gold"
+                    size="sm"
                     onClick={handleApplyNowClick}
                     className="shadow-lg hover:shadow-xl transition-all duration-300 text-yellow-600 font-bold border-2 border-sky-400 hover:border-sky-500 bg-transparent hover:bg-sky-50"
                   >
@@ -707,20 +747,20 @@ Status: ${record.paymentStatus}`);
           </motion.nav>
         )}
       </AnimatePresence>
-      
+
       {/* Hero Section */}
       <section className="relative pt-24 sm:pt-32 pb-12 sm:pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-royal/20 via-background to-crimson/20"></div>
-        
+
         {/* Floating Orbs */}
         <div className="absolute inset-0 overflow-hidden">
           <motion.div
-            animate={{ 
+            animate={{
               y: [0, -20, 0],
               x: [0, 10, 0],
               scale: [1, 1.05, 1]
             }}
-            transition={{ 
+            transition={{
               duration: 12,
               repeat: Infinity,
               ease: "easeInOut"
@@ -728,12 +768,12 @@ Status: ${record.paymentStatus}`);
             className="absolute top-10 right-10 w-64 h-64 rounded-full bg-gradient-radial from-gold/20 to-transparent blur-xl"
           />
           <motion.div
-            animate={{ 
+            animate={{
               y: [0, 15, 0],
               x: [0, -8, 0],
               scale: [1, 0.95, 1]
             }}
-            transition={{ 
+            transition={{
               duration: 15,
               repeat: Infinity,
               ease: "easeInOut"
@@ -741,7 +781,7 @@ Status: ${record.paymentStatus}`);
             className="absolute bottom-20 left-10 w-48 h-48 rounded-full bg-gradient-radial from-crimson/20 to-transparent blur-xl"
           />
         </div>
-        
+
         <div className="container-wide relative z-10 px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
             <div className="lg:col-span-7">
@@ -753,7 +793,7 @@ Status: ${record.paymentStatus}`);
                 <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading font-bold mb-4 sm:mb-6 leading-tight text-gradient-gold">
                   {admissionsData?.hero?.title || "Admissions that put your future first"}
                 </h1>
-                
+
                 {/* Admission Status Banner */}
                 {!admissionStatus && (
                   <motion.div
@@ -774,21 +814,21 @@ Status: ${record.paymentStatus}`);
                   {admissionsData?.hero?.subtitle || "Join a vibrant, supportive community. Our application is fast, holistic, and designed to highlight what makes you, you."}
                 </p>
                 <div className="flex flex-wrap gap-4 mb-12">
-                  <Button 
-                    variant="hero" 
-                    size="xl" 
+                  <Button
+                    variant="hero"
+                    size="xl"
                     onClick={handleApplyNowClick}
                     className={`font-bold shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-sky-400 hover:border-sky-500 ${
-                      admissionStatus 
+                      admissionStatus
                         ? 'text-yellow-600 bg-transparent hover:bg-sky-50'
                         : 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'
                     }`}
                   >
                     {admissionStatus ? 'Apply Now - Start your application' : 'Admissions Currently Closed'}
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="xl" 
+                  <Button
+                    variant="outline"
+                    size="xl"
                     onClick={() => setShowContactModal(true)}
                     className="text-yellow-600 font-bold border-2 border-sky-400 hover:border-sky-500 bg-transparent hover:bg-sky-50"
                   >
@@ -834,7 +874,7 @@ Status: ${record.paymentStatus}`);
                 </div>
               </motion.div>
             </div>
-            
+
             <div className="lg:col-span-5">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -873,7 +913,7 @@ Status: ${record.paymentStatus}`);
           <div className="relative">
             {/* Timeline Line */}
             <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-gold to-crimson opacity-30 hidden lg:block" />
-            
+
             <div className="space-y-8">
               {(admissionsData?.process?.steps || admissionProcess).map((step, index) => (
                 <motion.div
@@ -890,7 +930,7 @@ Status: ${record.paymentStatus}`);
                       <div className="absolute inset-0 rounded-full border-2 border-dashed border-gold/40" />
                     </div>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="lg:col-span-10">
                     <div className="card-3d p-8">
@@ -941,12 +981,12 @@ Status: ${record.paymentStatus}`);
                 key={req.title || req.category}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ 
-                  scale: 1.02, 
-                  y: -10 
+                whileHover={{
+                  scale: 1.02,
+                  y: -10
                 }}
-                transition={{ 
-                  duration: 0.3, 
+                transition={{
+                  duration: 0.3,
                   delay: index * 0.1,
                   type: "spring",
                   stiffness: 300
@@ -1038,8 +1078,8 @@ Status: ${record.paymentStatus}`);
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.02, y: -5 }}
-                transition={{ 
-                  duration: 0.3, 
+                transition={{
+                  duration: 0.3,
                   delay: index * 0.1,
                   type: "spring",
                   stiffness: 300
@@ -1055,7 +1095,7 @@ Status: ${record.paymentStatus}`);
                   <div className="text-2xl font-bold">{deadline.day}</div>
                   <div className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full mt-1">{deadline.tag}</div>
                 </motion.div>
-                
+
                 <div className="flex-1">
                   <h3 className="text-xl font-heading font-semibold mb-2 text-gradient-gold">{deadline.title}</h3>
                   <p className="text-muted-foreground mb-3">{deadline.description}</p>
@@ -1078,7 +1118,7 @@ Status: ${record.paymentStatus}`);
       {/* Tuition & Financial Aid */}
       <section id="tuition" className="section-padding bg-gradient-to-b from-background to-muted/20">
         <div className="container-wide">
-          
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1167,7 +1207,7 @@ Status: ${record.paymentStatus}`);
               <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
                 {admissionsData?.campus?.description || "Can't visit? Join a virtual info session or book a 1:1 with our admissions team."}
               </p>
-              
+
               {/* Campus Image Carousel */}
               {admissionsData?.campus?.images && admissionsData.campus.images.length > 0 && (
                 <div className="mb-8 max-w-4xl mx-auto">
@@ -1179,14 +1219,14 @@ Status: ${record.paymentStatus}`);
                         alt={`Campus view ${currentImageIndex + 1}`}
                         className="w-full h-full object-cover"
                       />
-                      
+
                       {/* Navigation Buttons */}
                       {admissionsData.campus.images.length > 1 && (
                         <>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setCurrentImageIndex(prev => 
+                            onClick={() => setCurrentImageIndex(prev =>
                               prev === 0 ? admissionsData.campus.images.length - 1 : prev - 1
                             )}
                             className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
@@ -1196,7 +1236,7 @@ Status: ${record.paymentStatus}`);
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setCurrentImageIndex(prev => 
+                            onClick={() => setCurrentImageIndex(prev =>
                               prev === admissionsData.campus.images.length - 1 ? 0 : prev + 1
                             )}
                             className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
@@ -1205,13 +1245,13 @@ Status: ${record.paymentStatus}`);
                           </Button>
                         </>
                       )}
-                      
+
                       {/* Image Counter */}
                       <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-sm">
                         {currentImageIndex + 1} / {admissionsData.campus.images.length}
                       </div>
                     </div>
-                    
+
                     {/* Thumbnail Navigation */}
                     {admissionsData.campus.images.length > 1 && (
                       <div className="flex justify-center mt-4 gap-2 overflow-x-auto">
@@ -1220,8 +1260,8 @@ Status: ${record.paymentStatus}`);
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
                             className={`flex-shrink-0 w-16 h-12 rounded overflow-hidden border-2 transition-all ${
-                              index === currentImageIndex 
-                                ? 'border-gold shadow-lg' 
+                              index === currentImageIndex
+                                ? 'border-gold shadow-lg'
                                 : 'border-transparent opacity-70 hover:opacity-100'
                             }`}
                           >
@@ -1237,15 +1277,15 @@ Status: ${record.paymentStatus}`);
                   </div>
                 </div>
               )}
-              
+
               <div className="flex flex-wrap gap-4 justify-center">
                 <Button variant="ghost" size="lg" onClick={() => setShowContactModal(true)}>Contact Admissions</Button>
-                <Button 
-                  variant={admissionStatus ? "gold" : "outline"} 
-                  size="lg" 
+                <Button
+                  variant={admissionStatus ? "gold" : "outline"}
+                  size="lg"
                   onClick={handleApplyNowClick}
-                  className={admissionStatus 
-                    ? 'text-yellow-600 font-bold border-2 border-sky-400 hover:border-sky-500 bg-transparent hover:bg-sky-50' 
+                  className={admissionStatus
+                    ? 'text-yellow-600 font-bold border-2 border-sky-400 hover:border-sky-500 bg-transparent hover:bg-sky-50'
                     : 'border-red-500 text-red-500 hover:bg-red-50'
                   }
                 >
@@ -1293,7 +1333,7 @@ Status: ${record.paymentStatus}`);
                     <ChevronRight className="h-5 w-5 text-gold flex-shrink-0" />
                   </motion.div>
                 </motion.button>
-                
+
                 <AnimatePresence>
                   {openFAQ === index && (
                     <motion.div
@@ -1334,7 +1374,7 @@ Status: ${record.paymentStatus}`);
                 <p>Hours: {admissionsData?.contact?.hours || "Mon–Fri, 9am–5pm"}</p>
               </div>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -1500,18 +1540,43 @@ Status: ${record.paymentStatus}`);
                             </select>
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="rollNumber">Roll Number *</Label>
+                            <Label htmlFor="fatherName">Father's Name *</Label>
                             <Input
-                              id="rollNumber"
-                              name="rollNumber"
-                              placeholder="Enter roll number"
-                              value={formData.rollNumber}
+                              id="fatherName"
+                              name="fatherName"
+                              placeholder="Enter father's name"
+                              value={formData.fatherName}
                               onChange={handleInputChange}
                               required
                             />
                           </div>
                         </div>
-                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="motherName">Mother's Name *</Label>
+                            <Input
+                              id="motherName"
+                              name="motherName"
+                              placeholder="Enter mother's name"
+                              value={formData.motherName}
+                              onChange={handleInputChange}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="studentAge">Student Age *</Label>
+                            <Input
+                              id="studentAge"
+                              name="studentAge"
+                              type="number"
+                              placeholder="Enter student's age"
+                              value={formData.studentAge}
+                              onChange={handleInputChange}
+                              required
+                            />
+                          </div>
+                        </div>
+
                         <div className="space-y-4">
                           <div className="space-y-2">
                             <Label htmlFor="aadhaarCard">Aadhaar Card *</Label>
@@ -1529,7 +1594,7 @@ Status: ${record.paymentStatus}`);
                             />
                             <p className="text-sm text-muted-foreground">Upload Aadhaar card (Image or PDF)</p>
                           </div>
-                          
+
                           <div className="space-y-2">
                             <Label htmlFor="birthCertificate">Birth Certificate *</Label>
                             <input
@@ -1546,7 +1611,7 @@ Status: ${record.paymentStatus}`);
                             />
                             <p className="text-sm text-muted-foreground">Upload birth certificate (Image or PDF)</p>
                           </div>
-                          
+
                           <div className="space-y-2">
                             <Label htmlFor="studentPhoto">Student Photo *</Label>
                             <input
@@ -1571,12 +1636,12 @@ Status: ${record.paymentStatus}`);
                             <h3 className="text-2xl font-bold mb-2">Choose Your Plan</h3>
                             <p className="text-muted-foreground">Select a subscription plan to complete your admission</p>
                           </div>
-                          
+
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div 
+                            <div
                               className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                                subscriptionType === 'monthly' 
-                                  ? 'border-gold bg-gold/5' 
+                                subscriptionType === 'monthly'
+                                  ? 'border-gold bg-gold/5'
                                   : 'border-border hover:border-gold/50'
                               }`}
                               onClick={() => setSubscriptionType('monthly')}
@@ -1593,11 +1658,11 @@ Status: ${record.paymentStatus}`);
                                 </ul>
                               </div>
                             </div>
-                            
-                            <div 
+
+                            <div
                               className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                                subscriptionType === 'yearly' 
-                                  ? 'border-gold bg-gold/5' 
+                                subscriptionType === 'yearly'
+                                  ? 'border-gold bg-gold/5'
                                   : 'border-border hover:border-gold/50'
                               }`}
                               onClick={() => setSubscriptionType('yearly')}
@@ -1628,13 +1693,13 @@ Status: ${record.paymentStatus}`);
                           {/* Payment Methods */}
                           <div className="space-y-3">
                             <h4 className="font-semibold mb-3">Choose Payment Method:</h4>
-                            
+
                             {/* Razorpay Option */}
                             <div
                               onClick={() => setSelectedPaymentMethod('razorpay')}
                               className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                                selectedPaymentMethod === 'razorpay' 
-                                  ? 'border-gold bg-gold/5' 
+                                selectedPaymentMethod === 'razorpay'
+                                  ? 'border-gold bg-gold/5'
                                   : 'border-border hover:border-gold/50'
                               }`}
                             >
@@ -1654,56 +1719,9 @@ Status: ${record.paymentStatus}`);
                               </div>
                             </div>
 
-                            {/* PayPal Option */}
-                            <div
-                              onClick={() => setSelectedPaymentMethod('paypal')}
-                              className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                                selectedPaymentMethod === 'paypal' 
-                                  ? 'border-gold bg-gold/5' 
-                                  : 'border-border hover:border-gold/50'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-12 h-8 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">
-                                    PayPal
-                                  </div>
-                                  <div>
-                                    <div className="font-semibold">PayPal</div>
-                                    <div className="text-sm text-muted-foreground">International payments</div>
-                                  </div>
-                                </div>
-                                <div className={`w-4 h-4 rounded-full border-2 ${
-                                  selectedPaymentMethod === 'paypal' ? 'border-gold bg-gold' : 'border-muted-foreground'
-                                }`} />
-                              </div>
-                            </div>
-
-                            {/* Stripe Option */}
-                            <div
-                              onClick={() => setSelectedPaymentMethod('stripe')}
-                              className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                                selectedPaymentMethod === 'stripe' 
-                                  ? 'border-gold bg-gold/5' 
-                                  : 'border-border hover:border-gold/50'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-12 h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs font-bold">
-                                    Stripe
-                                  </div>
-                                  <div>
-                                    <div className="font-semibold">Stripe</div>
-                                    <div className="text-sm text-muted-foreground">Credit/Debit Cards</div>
-                                  </div>
-                                </div>
-                                <div className={`w-4 h-4 rounded-full border-2 ${
-                                  selectedPaymentMethod === 'stripe' ? 'border-gold bg-gold' : 'border-muted-foreground'
-                                }`} />
-                              </div>
-                            </div>
-
+                            {/* PayPal Option - REMOVED */}
+                            {/* Stripe Option - REMOVED */}
+                          </div>
                           {/* Payment Buttons */}
                           <div className="mt-6 flex gap-3">
                             <Button
@@ -1742,7 +1760,7 @@ Status: ${record.paymentStatus}`);
                     >
                       Back
                     </Button>
-                    
+
                     {currentStep < 1 && (
                       <Button
                         type="button"
@@ -1809,7 +1827,7 @@ Status: ${record.paymentStatus}`);
                       placeholder="Enter your full name"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="contactClass">Class/Grade</Label>
                     <select
@@ -1827,7 +1845,7 @@ Status: ${record.paymentStatus}`);
                       ))}
                     </select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="contactPhone">Phone Number *</Label>
                     <Input
@@ -1840,7 +1858,7 @@ Status: ${record.paymentStatus}`);
                       placeholder="Enter your phone number"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="contactEmail">Email Address *</Label>
                     <Input
@@ -1876,7 +1894,7 @@ Status: ${record.paymentStatus}`);
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       <Footer />
     </div>
   );
