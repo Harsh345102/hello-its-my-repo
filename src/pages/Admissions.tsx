@@ -5,7 +5,7 @@ import { Calendar, FileText, Users, CheckCircle, Clock, DollarSign, GraduationCa
 import { Button } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/texxxxxtarea";
+import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { getSupabaseData, setSupabaseData, subscribeToSupabaseChanges } from "@/lib/supabaseHelpers";
 
@@ -1703,7 +1703,7 @@ Status: ${record.paymentStatus}`);
                               variant="default"
                               onClick={handlePayment}
                               disabled={!selectedPaymentMethod || paymentProcessing}
-                              className="w-full bg-gold hover:bg-gold/90 text-black font-semibold"
+                              className="w-full bg-[#ffbe00] hover:bg-[#e6ac00] text-white font-semibold cursor-default"
                             >
                               {paymentProcessing ? 'Processing...' : 'Pay & Submit'}
                             </Button>
@@ -1736,7 +1736,7 @@ Status: ${record.paymentStatus}`);
                     {currentStep < 1 && (
                       <Button
                         type="button"
-                        variant="gold"
+                        variant="default"
                         onClick={() => {
                           if (currentStep === 0) {
                             if (validateStep1()) {
@@ -1744,6 +1744,7 @@ Status: ${record.paymentStatus}`);
                             }
                           }
                         }}
+                        className="bg-[#ffbe00] text-white font-semibold cursor-default hover:bg-[#e6ac00]"
                       >
                         Next
                       </Button>
@@ -1861,7 +1862,7 @@ Status: ${record.paymentStatus}`);
                     </Button>
                     <Button
                       type="submit"
-                      className="flex-1 bg-gradient-to-r from-gold to-yellow-500 text-black font-bold"
+                      className="flex-1 bg-[#ffbe00] hover:bg-[#e6ac00] text-white font-bold cursor-default"
                     >
                       Submit
                     </Button>
