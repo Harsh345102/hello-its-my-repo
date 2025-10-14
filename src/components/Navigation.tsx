@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, GraduationCap, BookOpen, Users, Calendar, Mail, LogIn, Home, Building, Camera, Trophy, Bell, Eye, Zap } from "lucide-react";
+import { Menu, X, ChevronDown, GraduationCap, BookOpen, Users, Calendar, Mail, LogIn, Home, Building, Camera, Trophy, Bell, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "./ui/button-variants";
 import { getSupabaseData } from "@/lib/supabaseHelpers";
@@ -11,9 +11,7 @@ const Navigation = () => {
   const [scrollY, setScrollY] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [performanceMode, setPerformanceMode] = useState(() => {
-    return localStorage.getItem('performance-mode') === 'true';
-  });
+  const [performanceMode, setPerformanceMode] = useState(false);
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -124,18 +122,6 @@ const Navigation = () => {
     }
   }, [performanceMode]);
 
-  // Detect mobile devices and apply performance optimizations
-  useEffect(() => {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isLowPerformance = isMobile || window.innerWidth < 768;
-    
-    if (isLowPerformance) {
-      // Auto-enable performance mode on mobile devices
-      setPerformanceMode(true);
-      document.documentElement.classList.add('performance-mode');
-      localStorage.setItem('performance-mode', 'true');
-    }
-  }, []);
 
   // Load notifications from localStorage (connected to principal announcements)
   useEffect(() => {
@@ -403,21 +389,6 @@ const Navigation = () => {
                 </Link>
               );
             })()}
-
-            {/* Performance Mode Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={togglePerformanceMode}
-              className="p-2"
-              aria-label="Toggle performance mode"
-            >
-              {performanceMode ? (
-                <Zap className="h-4 w-4 text-yellow-400" />
-              ) : (
-                <Zap className="h-4 w-4 text-muted-foreground" />
-              )}
-            </Button>
 
             {/* Notification Bell */}
             <div className="relative" data-notification-container>

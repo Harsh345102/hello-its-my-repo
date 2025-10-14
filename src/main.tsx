@@ -10,10 +10,10 @@ const AppWithLoading = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate a delay for loading animation
+    // Minimal delay for loading animation
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 500); // 500ms delay
+    }, 100); // 100ms delay - fast loading
 
     return () => clearTimeout(timer);
   }, []);
