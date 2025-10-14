@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import FacilitiesBanner from "@/components/FacilitiesBanner";
 import { motion } from "framer-motion";
 import { BookOpen, Beaker, Dumbbell, Theater, Cpu, Heart, Coffee, Car, ArrowUp } from "lucide-react";
 import { getSupabaseData, subscribeToSupabaseChanges } from "@/lib/supabaseHelpers";
@@ -157,25 +158,10 @@ const Facilities = () => {
     <div className="min-h-screen">
       <Navigation />
       
-      {/* Hero Section */}
-      <section className="relative pt-24 sm:pt-32 pb-16 sm:pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-royal/20 via-background to-crimson/20"></div>
-        <div className="container-wide relative z-10 px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading font-bold mb-4 sm:mb-6">
-              World-Class <span className="text-gradient-gold">Facilities</span>
-            </h1>
-            <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2 sm:px-0">
-              Experience learning in state-of-the-art facilities designed to inspire, innovate, and excel in every aspect of education.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      {/* Hero Banner with PixelBlast */}
+      <div className="pt-20 sm:pt-24">
+        <FacilitiesBanner />
+      </div>
 
       {/* Campus Stats */}
       <section className="section-padding bg-gradient-to-r from-royal/5 via-background to-crimson/5">
