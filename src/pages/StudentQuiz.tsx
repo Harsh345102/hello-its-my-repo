@@ -161,10 +161,27 @@ Important:
     const data = await response.json();
     const text = data.candidates[0].content.parts[0].text;
     
+    // Clean the text to extract valid JSON
     const match = text.match(/\[[\s\S]*\]/);
-    const questions = match ? JSON.parse(match[0]) : JSON.parse(text);
+    if (!match) {
+      throw new Error("Could not extract questions from AI response");
+    }
     
-    return questions.slice(0, quizState.questionCount);
+    let cleanedJson = match[0];
+    // Remove any control characters and fix common JSON issues
+    cleanedJson = cleanedJson.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+    
+    try {
+      const questions = JSON.parse(cleanedJson);
+      if (!Array.isArray(questions)) {
+        throw new Error("Invalid questions format");
+      }
+      return questions.slice(0, quizState.questionCount);
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError);
+      console.error("Attempted to parse:", cleanedJson.substring(0, 500));
+      throw new Error("Failed to parse questions. Please try again.");
+    }
   };
 
   const generateHint = async (question: string) => {
