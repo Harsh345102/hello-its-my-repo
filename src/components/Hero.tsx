@@ -198,17 +198,13 @@ const Hero = () => {
               className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-tight sm:leading-normal text-white"
               style={{ fontFamily: homepageData.fonts.heading }}
             >
-              {brandingData.schoolName}
+              {homepageData.heroTitle}
             </h1>
             <p 
               className="text-sm xs:text-base sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed px-2 sm:px-0 text-white"
               style={{ fontFamily: homepageData.fonts.body }}
             >
-              <ShinyText 
-                text={homepageData.heroSubtitle}
-                speed={3}
-                className="font-medium"
-              />
+              {homepageData.heroSubtitle}
             </p>
           </div>
 
