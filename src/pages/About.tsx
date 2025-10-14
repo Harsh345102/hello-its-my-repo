@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button-variants";
 import ShinyText from "@/components/ShinyText";
 import TextType from "@/components/TextType";
+import Squares from "@/components/Squares";
 
 interface AboutPageData {
   heroTitle: string;
@@ -191,6 +192,15 @@ const About = () => {
       {/* Hero Section */}
       <section className="relative pt-24 sm:pt-32 pb-12 sm:pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-royal/20 via-background to-crimson/20"></div>
+        <div className="absolute inset-0 opacity-30">
+          <Squares
+            direction="diagonal"
+            speed={0.5}
+            borderColor="#D4AF37"
+            squareSize={50}
+            hoverFillColor="rgba(212, 175, 55, 0.2)"
+          />
+        </div>
         <div className="container-wide relative z-10 px-4 sm:px-6">
           {/* Back Button */}
           <motion.div
