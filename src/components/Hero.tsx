@@ -3,7 +3,6 @@ import { ArrowRight, Award, BookOpen, Users } from "lucide-react";
 import { Button } from "./ui/button-variants";
 import { Link } from "react-router-dom";
 import { getSupabaseData } from "@/lib/supabaseHelpers";
-import TextType from "@/components/TextType";
 import ShinyText from "@/components/ShinyText";
 
 interface HomepageData {
@@ -196,19 +195,10 @@ const Hero = () => {
           {/* Main Heading */}
           <div className="space-y-4 sm:space-y-6">
             <h1 
-              className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-tight sm:leading-normal"
+              className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-tight sm:leading-normal text-white"
               style={{ fontFamily: homepageData.fonts.heading }}
             >
-              <TextType 
-                text={[homepageData.heroTitle, "Excellence in Education", "Shaping Future Leaders"]}
-                typingSpeed={80}
-                deletingSpeed={50}
-                pauseDuration={2000}
-                className="inline-block"
-                showCursor={true}
-                cursorCharacter="|"
-                textColors={["#FFD700", "#FFA500", "#FFFFFF"]}
-              />
+              {brandingData.schoolName}
             </h1>
             <p 
               className="text-sm xs:text-base sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed px-2 sm:px-0 text-white"
