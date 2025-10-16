@@ -45,7 +45,7 @@ const Gallery = () => {
               Visual <span className="text-gradient-gold">Gallery</span>
             </h1>
             <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">
-              Explore life at Royal Academy through our comprehensive photo gallery showcasing campus, academics, and student life.
+              Explore life at Harsh kumar sah through our comprehensive photo gallery showcasing campus, academics, and student life.
             </p>
           </motion.div>
         </div>
